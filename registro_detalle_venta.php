@@ -14,12 +14,12 @@
 
     try {
         // Recibiendo valores
-        $cliId = $_GET['ClienteId'];
-        $calle = $_GET['calle'];
-        $numExt = $_GET['numExt'];
-        $numInt = $_GET['numInt'] ?? '';
-        $ciudad = $_GET['ciudad'];
-        $estado = $_GET['estado'];
+        $ventaId = $_GET['ventaId'];
+        $productoId = $_GET['productoId'];
+        $cantidad = $_GET['cantidad'];
+        $precio = $_GET['precio'];
+        $costo = $_GET['costo'];
+        
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -43,13 +43,15 @@
         }                                 
                                 
 
-        $sql = "SELECT * FROM clients WHERE clients.Cli_Id = ".$cliId.";";
+        $sql = "SELECT * FROM sales WHERE sales.Sal_Id = ".$ventaId.";";
+        $sql2 = "SELECT * FROM products WHERE products.Prod_Id = ".$productoId.";";
         
         $res = $mysqli->query($sql);
+        $res2 = $mysqli->query($sql2);
         
-        if ($res->num_rows > 0) {
-          $sql = "INSERT INTO clients_adress (`Cli_Id`, `CliAddres_Street`, `CliAddres_Extnum`, `CliAddres_Intnum`, `CliAddres_City`, `CliAddres_State`)"
-                ."VALUES ('".$cliId."', '".$calle."', '".$numExt."', '".$numInt."', '".$ciudad."', '".$estado."');";
+        if (($res->num_rows > 0) and ($res->num_rows > 0)) {
+          $sql = "INSERT INTO sales_details (`SalDet_SalId`, `SalDet_ProdId`, `SalDet_Quantity`, `SalDet_Price`, `SalDet_Cost`)"
+                ."VALUES ('".$ventaId."','".$productoId."', '".$cantidad."', '".$precio."', '".$costo."');";
         
           $mysqli->query($sql);
 
@@ -66,7 +68,7 @@
           }
         } else {
           $json->status = "WARNING";
-          $json->message = "The client id does not exist.";
+          $json->message = "The sales or the product id does not exist.";
           $json->errorType = "IndexNotValid";
           echo json_encode($json);
         }

@@ -14,12 +14,7 @@
 
     try {
         // Recibiendo valores
-        $cliId = $_GET['ClienteId'];
-        $calle = $_GET['calle'];
-        $numExt = $_GET['numExt'];
-        $numInt = $_GET['numInt'] ?? '';
-        $ciudad = $_GET['ciudad'];
-        $estado = $_GET['estado'];
+        $sql = $_GET['sql'];
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -41,34 +36,23 @@
             $json->sqlMessage = $mysqli->connect_error;
             echo json_encode($json);
         }                                 
-                                
-
-        $sql = "SELECT * FROM clients WHERE clients.Cli_Id = ".$cliId.";";
-        
+          
         $res = $mysqli->query($sql);
-        
-        if ($res->num_rows > 0) {
-          $sql = "INSERT INTO clients_adress (`Cli_Id`, `CliAddres_Street`, `CliAddres_Extnum`, `CliAddres_Intnum`, `CliAddres_City`, `CliAddres_State`)"
-                ."VALUES ('".$cliId."', '".$calle."', '".$numExt."', '".$numInt."', '".$ciudad."', '".$estado."');";
-        
-          $mysqli->query($sql);
 
-          if ($mysqli->affected_rows > 0) {
-            $json->status = "OK";
-            $json->message = "Insertion has been done.";
-            echo json_encode($json);
-          } else {
-              $json->status = "WARNING";
-              $json->message = "Insertion failed.";
-              $json->errorType = "MySQLError";
-              $json->sqlMessage = $mysqli->error;
-              echo json_encode($json);
-          }
+
+        if ($mysqli->affected_rows > 0) {
+            // $json->status = "OK";
+            // $json->message = "Insertion has been done.";
+            // echo json_encode($json);
+            while($row = $res->fetch_assoc()) {
+              print_r($row);
+            }
         } else {
-          $json->status = "WARNING";
-          $json->message = "The client id does not exist.";
-          $json->errorType = "IndexNotValid";
-          echo json_encode($json);
+            $json->status = "WARNING";
+            $json->message = "Insertion failed.";
+            $json->errorType = "MySQLError";
+            $json->sqlMessage = $mysqli->error;
+            echo json_encode($json);
         }
         
     }catch(Exception $e) {

@@ -15,11 +15,7 @@
     try {
         // Recibiendo valores
         $cliId = $_GET['ClienteId'];
-        $calle = $_GET['calle'];
-        $numExt = $_GET['numExt'];
-        $numInt = $_GET['numInt'] ?? '';
-        $ciudad = $_GET['ciudad'];
-        $estado = $_GET['estado'];
+        $telefono = $_GET['telefono'];
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -48,8 +44,8 @@
         $res = $mysqli->query($sql);
         
         if ($res->num_rows > 0) {
-          $sql = "INSERT INTO clients_adress (`Cli_Id`, `CliAddres_Street`, `CliAddres_Extnum`, `CliAddres_Intnum`, `CliAddres_City`, `CliAddres_State`)"
-                ."VALUES ('".$cliId."', '".$calle."', '".$numExt."', '".$numInt."', '".$ciudad."', '".$estado."');";
+          $sql = "INSERT INTO clients_phones (`Cli_Id`, `CliPhones_Number`)"
+                ."VALUES ('".$cliId."', '".$telefono."');";
         
           $mysqli->query($sql);
 

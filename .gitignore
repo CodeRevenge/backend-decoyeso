@@ -31,6 +31,7 @@ composer.phar
 .Python
 pyvenv.cfg
 .env
+.env_s
 .venv
 .env_local
 env/

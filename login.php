@@ -14,12 +14,8 @@
 
     try {
         // Recibiendo valores
-        $cliId = $_GET['ClienteId'];
-        $calle = $_GET['calle'];
-        $numExt = $_GET['numExt'];
-        $numInt = $_GET['numInt'] ?? '';
-        $ciudad = $_GET['ciudad'];
-        $estado = $_GET['estado'];
+        $nickname = $_GET['nickname'];
+        $pw = $_GET['password'];
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -40,37 +36,33 @@
             $json->errorType = "MySQLError";
             $json->sqlMessage = $mysqli->connect_error;
             echo json_encode($json);
-        }                                 
-                                
-
-        $sql = "SELECT * FROM clients WHERE clients.Cli_Id = ".$cliId.";";
+        }
+      
+        $sql = "SELECT Emp_Password FROM employees WHERE Emp_Nickname = '".$nickname."';";
         
         $res = $mysqli->query($sql);
-        
-        if ($res->num_rows > 0) {
-          $sql = "INSERT INTO clients_adress (`Cli_Id`, `CliAddres_Street`, `CliAddres_Extnum`, `CliAddres_Intnum`, `CliAddres_City`, `CliAddres_State`)"
-                ."VALUES ('".$cliId."', '".$calle."', '".$numExt."', '".$numInt."', '".$ciudad."', '".$estado."');";
-        
-          $mysqli->query($sql);
 
-          if ($mysqli->affected_rows > 0) {
-            $json->status = "OK";
-            $json->message = "Insertion has been done.";
-            echo json_encode($json);
-          } else {
-              $json->status = "WARNING";
-              $json->message = "Insertion failed.";
-              $json->errorType = "MySQLError";
-              $json->sqlMessage = $mysqli->error;
+        if ($res->num_rows > 0) {
+          while($row = $res->fetch_assoc()) {
+            $hash = $row["Emp_Password"];
+
+            if (password_verify($pw, $hash)) {
+              $json->status = "OK";
+              $json->message = "Wellcome ".$nickname.".";
               echo json_encode($json);
+            } else {
+              $json->status = "WARNING";
+              $json->message = "Username or password are incorrect.";
+              $json->errorType = "LOGIN error";
+              echo json_encode($json);
+            }
           }
         } else {
           $json->status = "WARNING";
-          $json->message = "The client id does not exist.";
-          $json->errorType = "IndexNotValid";
+          $json->message = "Username or password are incorrect.";
+          $json->errorType = "LOGIN error";
           echo json_encode($json);
         }
-        
     }catch(Exception $e) {
         $json = new stdClass;
         $json->status = "ERROR";

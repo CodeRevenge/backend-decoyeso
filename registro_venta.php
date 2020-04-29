@@ -14,12 +14,12 @@
 
     try {
         // Recibiendo valores
-        $cliId = $_GET['ClienteId'];
-        $calle = $_GET['calle'];
-        $numExt = $_GET['numExt'];
-        $numInt = $_GET['numInt'] ?? '';
-        $ciudad = $_GET['ciudad'];
-        $estado = $_GET['estado'];
+        $empleadoId = $_GET['empleadoId'];
+        $neto = $_GET['neto'];
+        $iva = $_GET['iva'];
+        $total = $_GET['total'];
+        $clienteId = $_GET['clienteId'] ?? "";
+        
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -41,19 +41,35 @@
             $json->sqlMessage = $mysqli->connect_error;
             echo json_encode($json);
         }                                 
-                                
+        
+        if ($clienteId != "") {
+          $sql = "SELECT * FROM clients WHERE clients.Cli_Id = ".$clienteId.";";
+          $resCli = $mysqli->query($sql);
+          if ($resCli->num_rows <= 0) {
+            $json->status = "WARNING";
+            $json->message = "The client id does not exist.";
+            $json->errorType = "IndexNotValid";
+            echo json_encode($json);
+          }
+        }
 
-        $sql = "SELECT * FROM clients WHERE clients.Cli_Id = ".$cliId.";";
+        $sql = "SELECT * FROM employees WHERE employees.Emp_Id = ".$empleadoId.";";
         
         $res = $mysqli->query($sql);
         
         if ($res->num_rows > 0) {
-          $sql = "INSERT INTO clients_adress (`Cli_Id`, `CliAddres_Street`, `CliAddres_Extnum`, `CliAddres_Intnum`, `CliAddres_City`, `CliAddres_State`)"
-                ."VALUES ('".$cliId."', '".$calle."', '".$numExt."', '".$numInt."', '".$ciudad."', '".$estado."');";
+          $sql = "INSERT INTO sales (`Sal_EmpId`, `Sal_Net`, `Sal_IVA`, `Sal_Total`)"
+                ."VALUES ('".$empleadoId."','".$neto."', '".$iva."', '".$total."');";
         
           $mysqli->query($sql);
 
           if ($mysqli->affected_rows > 0) {
+            
+            if ($clienteId != "") {
+              $sql = "INSERT INTO sale_client (`Sal_Id`, `Cli_Id`)"
+              ."VALUES ('".$mysqli->insert_id."','".$clienteId."');";
+              $mysqli->query($sql);
+            }
             $json->status = "OK";
             $json->message = "Insertion has been done.";
             echo json_encode($json);
@@ -66,7 +82,7 @@
           }
         } else {
           $json->status = "WARNING";
-          $json->message = "The client id does not exist.";
+          $json->message = "The employee id does not exist.";
           $json->errorType = "IndexNotValid";
           echo json_encode($json);
         }
