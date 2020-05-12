@@ -1,7 +1,5 @@
 <?php
     require("./vendor/autoload.php");
-    use \Firebase\JWT\JWT;
-
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 
@@ -16,8 +14,6 @@
 
     try {
         // Recibiendo valores
-        $nickname = $_GET['nickname'];
-        $pw = $_GET['password'];
         
         $json = new stdClass; 
         // Conexión con Base de Datos
@@ -38,54 +34,44 @@
             $json->errorType = "MySQLError";
             $json->sqlMessage = $mysqli->connect_error;
             echo json_encode($json);
-        }
-      
-        $sql = "SELECT * FROM employees WHERE Emp_Nickname = '".$nickname."';";
-        
+        }                                 
+          
+        $sql = "SELECT * FROM products";
+
         $res = $mysqli->query($sql);
-        
-        if ($res->num_rows > 0) {
-          while($row = $res->fetch_assoc()) {
-            
-            $hash = $row["Emp_Password"];
-
-            if (password_verify($pw, $hash)) {
-              $time = time();
 
 
-              $payload = array(
-                "iat" => $time,
-                "exp" => $time + (60*60*8),
-                "data" => [
-                  "id" => $row["Emp_Id"],
-                  "name" => $row["Emp_Nickname"],
-                  "role" => $row["Emp_Role"]
-                ]
-              );
-
-              $jwt = JWT::encode($payload, $_ENV['SECRET_KEY']);
-
-              $json->status = "OK";
-              $json->message = "Welcome ".$row['Emp_Fistname'].".";
-              $json->jwt = $jwt;
-              echo json_encode($json);
-            } else {
-              $json->status = "WARNING";
-              $json->message = "Username or password are incorrect.";
-              $json->errorType = "LOGIN error";
-              echo json_encode($json);
+        if ($mysqli->affected_rows > 0) {
+            // $json->status = "OK";
+            // $json->message = "Insertion has been done.";
+            // echo json_encode($json);
+            $list = new stdClass; 
+            $i = 0;
+            while($row = $res->fetch_assoc()) {
+              $item = new stdClass;
+              $item->id = $row["Prod_Id"];
+              $item->name = $row["Prod_Name"];
+              $item->desc = $row["Prod_Descr"];
+              $item->value = $row["Prod_Value"];
+              $item->quantity = $row["Prod_Quantity"];
+              $item->status = $row["Prod_Status"];
+              $item->introdate = $row["Prod_IntroDate"];
+              $list->{$i} = $item;
+              $i++;
             }
-          }
+            echo json_encode($list);
         } else {
-          $json->status = "WARNING";
-          $json->message = "Username or password are incorrect.";
-          $json->errorType = "LOGIN error";
-          echo json_encode($json);
+            $json->status = "WARNING";
+            $json->message = "No products.";
+            $json->errorType = "MySQLError";
+            $json->sqlMessage = $mysqli->error;
+            echo json_encode($json);
         }
+        
     }catch(Exception $e) {
         $json = new stdClass;
         $json->status = "ERROR";
-        $json->message = "Something gone wrong.";
+        $json->message = "Error.";
         $json->errorType = "ExceptionError";
         $json->eMessage = $e->getMessage();
         echo json_encode($json);
