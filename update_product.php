@@ -13,13 +13,12 @@ try {
     if ((int) $resp->role >= $MIN_PERMISSION) {
 
 
-        $nombre = $_GET['nombre'];
+        $id = $_GET['id'];
+        $name = $_GET['nombre'];
         $desc = $_GET['descripcion'];
         $cost = $_GET['costo'];
         $qty = $_GET['cantidad'];
-        $status = 5;
-
-
+        $status = $_GET['status'];
 
         $json = new stdClass;
         // Conexión con Base de Datos
@@ -45,20 +44,19 @@ try {
         }
 
 
-        $sql = "INSERT INTO `products` (`Prod_Name`, `Prod_Descr`, `Prod_Value`,"
-        ." `Prod_Quantity`, `Prod_Status`)VALUES ('" . $nombre . "', '" . $desc 
-        ."', '" . $cost . "', '" . $qty . "', '" . $status . "');";
+        $sql = "UPDATE products SET Prod_Name='".$name."', Prod_Descr='".$desc."', Prod_Value='".$cost."',"
+        ." Prod_Quantity='".$qty."', `Prod_Status`='".$status."' WHERE Prod_Id = '".$id."';";
 
         $mysqli->query($sql);
 
 
         if ($mysqli->affected_rows > 0) {
             $json->status = "OK";
-            $json->message = "Insertion has been done.";
+            $json->message = "Update has been done.";
             echo json_encode($json);
         } else {
             $json->status = "WARNING";
-            $json->message = "Insertion failed.";
+            $json->message = "Update failed.";
             $json->errorType = "MySQLError";
             $json->sqlMessage = $mysqli->error;
             echo json_encode($json);
@@ -67,7 +65,7 @@ try {
 } catch (Exception $e) {
     $json = new stdClass;
     $json->status = "ERROR";
-    $json->message = "Insertion failed.";
+    $json->message = "Update failed.";
     $json->errorType = "ExceptionError";
     $json->eMessage = $e->getMessage();
     echo json_encode($json);

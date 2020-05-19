@@ -65,7 +65,7 @@
             $json->role = -1;
             return $json;
         }
-        print_r($data);
+        
       
         $sql = "SELECT * FROM employees WHERE Emp_Nickname = '"
             .$data->data->name."' AND Emp_Id = '".$data->data->id."'"
