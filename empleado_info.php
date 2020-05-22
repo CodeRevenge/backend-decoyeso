@@ -6,7 +6,7 @@ $dotenv->load();
 $MIN_PERMISSION = 1;
 try {
   // Recibiendo valores
-
+  $id = $_GET['id'] ?? "";
   $token = $_SERVER['HTTP_TOKEN'] ?? "";
   $resp = verifyRole($token);
 
@@ -33,19 +33,28 @@ try {
       echo json_encode($json);
     }
 
-    $sql = "SELECT E.*,"
-      . " (SELECT EmpRoles_Name FROM employees_roles WHERE EmpRoles_Id  = E.Emp_Role) AS Emp_Role "
-      . ",(SELECT EmpStatus_Name FROM employees_status"
-      . " WHERE EmpStatus_Id  = E.Emp_Status) AS Emp_StatusName"
-      . " FROM employees E WHERE Emp_Id = '" . $resp->id . "';";
+    
+    $sql = "SELECT E.*, E.Emp_Role as Emp_Rol,"
+    . " (SELECT EmpRoles_Name FROM employees_roles WHERE EmpRoles_Id  = E.Emp_Role) AS Emp_Role "
+    . ",(SELECT EmpStatus_Name FROM employees_status"
+    . " WHERE EmpStatus_Id  = E.Emp_Status) AS Emp_StatusName";
 
+   
 
+    if(empty($id)){
+      $sql .= " FROM employees E WHERE Emp_Id = '" . $resp->id . "';";
+    }else {
+      $sql .= " FROM employees E WHERE Emp_Id = '" . $id . "';";
+    }
+
+    // echo $sql;
+    // echo $id;
 
     $res = $mysqli->query($sql);
 
     if ($mysqli->affected_rows > 0) {
       while ($row = $res->fetch_assoc()) {
-        if($row["Emp_Status"] == 1) {
+        if($row["Emp_Status"] == 1 && empty($id)) {
           $list = new stdClass;
           $list->status = "OK";
           $data = new stdClass;
@@ -60,6 +69,26 @@ try {
           $data->phone = $row["Emp_Phone"];
           $data->status = $row["Emp_Status"];
           $data->role = $row["Emp_Role"];
+          $data->rol = $row["Emp_Rol"];
+          $data->introdate = $row["Emp_InitDate"];
+          $list->data = $data;
+          echo json_encode($list);
+        } else if (!empty($id)) {
+          $list = new stdClass;
+          $list->status = "OK";
+          $data = new stdClass;
+          $data->id = $row["Emp_Id"];
+          $data->CURP = $row["Emp_CURP"];
+          $data->nickname = $row["Emp_Nickname"];
+          $data->firstname = $row["Emp_Fistname"];
+          $data->lastname = $row["Emp_Lastname"];
+          $data->status = $row["Emp_Status"];
+          $data->statusName = $row["Emp_StatusName"];
+          $data->addres = $row["Emp_Addres"];
+          $data->phone = $row["Emp_Phone"];
+          $data->status = $row["Emp_Status"];
+          $data->role = $row["Emp_Role"];
+          $data->rol = $row["Emp_Rol"];
           $data->introdate = $row["Emp_InitDate"];
           $list->data = $data;
           echo json_encode($list);
