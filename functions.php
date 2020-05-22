@@ -40,6 +40,7 @@
           }else {
             $json = new stdClass;
             $json->status = "TOKEN_ERROR";
+            $json->message = "The token has not been verifyed.";
             $json->eMessage = $e->getMessage();
             $json->role = -1;
             return $json;

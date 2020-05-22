@@ -72,6 +72,7 @@ try {
             echo json_encode($list);
         } else {
             $json->status = "WARNING";
+            $json->code = "-1";
             $json->message = "No products.";
             $json->errorType = "MySQLError";
             $json->sqlMessage = $mysqli->error;
